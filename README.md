@@ -34,9 +34,15 @@ The repository will contain service configurations, automation scripts, CI/CD co
 
 ## Goals
 
-HobbyHub aims to provide a practical environment for developing skills in systems engineering, DevOps and automation while building something useful for personal use.
+The project aims to provide a practical environment for developing skills in systems engineering, DevOps and automation while building something useful for personal use.
 
 The emphasis is on reproducibility, maintainability, reliability and reducing manual intervention through automation.
+
+## Platforms
+
+### Navidrome
+
+For hosting local music files. Deployment via docker compose.
 
 ## Status
 
