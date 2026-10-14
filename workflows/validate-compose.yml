@@ -1,0 +1,23 @@
+
+name: Validate MediaHub
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate-compose:
+    name: Validate Docker Compose
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check Docker Compose
+        run: docker compose version
+
+      - name: Validate Compose configuration
+        env:
+          MUSIC_DIR: /tmp/mediahub-music
+        run: docker compose config -q
