@@ -1,0 +1,5 @@
+/services/navidrome/data/artwork/hashed/*
+/services/navidrome/data/cache/*
+/services/navidrome/data/*.db
+/services/navidrome/data/*.db-shm
+/services/navidrome/data/*.db-wal

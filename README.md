@@ -31,6 +31,7 @@ Specific technologies may evolve as the project develops.
 ## Project Structure
 
 The repository will contain service configurations, automation scripts, CI/CD configuration, tests and documentation. Its structure will evolve alongside the project.
+Personal setup running using WSL, the default .env and settings will reflect that.
 
 ## Goals
 
@@ -42,9 +43,9 @@ The emphasis is on reproducibility, maintainability, reliability and reducing ma
 
 ### Navidrome
 
-For hosting local music files. Deployment via docker compose.
+For hosting local music library. Deployment via docker compose. Runs on port 4533 by default(subject to change).
 
 ## Status
 
-Currently in development.
+Currently in development, experimental.
 
