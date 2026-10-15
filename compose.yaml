@@ -18,3 +18,17 @@ services:
     volumes:
       - "./services/navidrome/data:/data"
       - "${MUSIC_DIR:?Set MUSIC_DIR in .env}:/music:ro"
+  restic:
+    image: restic/restic:latest
+    container_name: mediahub-restic
+    hostname: mediahub
+    profiles:
+      - backup
+    environment:
+      RESTIC_REPOSITORY: /repository
+      RESTIC_PASSWORD_FILE: /run/secrets/restic_password
+    volumes:
+      - ./services/navidrome/data:/source/navidrome:ro
+      - ${RESTIC_REPOSITORY_PATH:?Set RESTIC_REPOSITORY_PATH in .env}:/repository
+      - ${RESTIC_PASSWORD_FILE:?Set RESTIC_PASSWORD_FILE in .env}:/run/secrets/restic_password:ro
+    entrypoint: ["restic"]

@@ -45,7 +45,28 @@ The emphasis is on reproducibility, maintainability, reliability and reducing ma
 
 For hosting local music library. Deployment via docker compose. Runs on port 4533 by default(subject to change).
 
+### Backup and Recovery
+
+Mediahub uses [Restic](https://restic.net/) in Docker to create encrypted backups of Navidrome's(only for now) application data, excluding the music library.
+
+- **Storage:** Local Restic repository inside the WSL filesystem.
+- **Security:** Encrypted backups with a password stored outside Git.
+- **Retention:** Keeps the seven most recent daily snapshots.
+- **Verification:** Checks repository integrity and supports restore testing.
+- **Automation:** Backups currently run manually via `scripts/backup.sh`; scheduling will be added later.
+
+Run a backup:
+
+```bash
+./scripts/backup.sh
+```
+List snapshots:
+
+```bash
+docker compose --profile backup run --rm restic snapshots
+```
+
 ## Status
 
-Currently in development, experimental.
+Currently in development, experimental and very much unfinished.
 
