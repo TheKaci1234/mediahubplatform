@@ -1,3 +1,4 @@
+
 services:
   navidrome:
     image: deluan/navidrome:latest
@@ -9,6 +10,8 @@ services:
       ND_LOGLEVEL: info
       ND_MUSICFOLDER: /music
       ND_DATAFOLDER: /data
+      ND_PROMETHEUS_ENABLED: "true"
+      ND_PROMETHEUS_METRICSPATH: "/metrics_mediahub"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4533/app/"]
       interval: 30s
@@ -18,6 +21,7 @@ services:
     volumes:
       - "./services/navidrome/data:/data"
       - "${MUSIC_DIR:?Set MUSIC_DIR in .env}:/music:ro"
+
   restic:
     image: restic/restic:latest
     container_name: mediahub-restic
@@ -29,6 +33,30 @@ services:
       RESTIC_PASSWORD_FILE: /run/secrets/restic_password
     volumes:
       - ./services/navidrome/data:/source/navidrome:ro
-      - ${RESTIC_REPOSITORY_PATH:?Set RESTIC_REPOSITORY_PATH in .env}:/repository
-      - ${RESTIC_PASSWORD_FILE:?Set RESTIC_PASSWORD_FILE in .env}:/run/secrets/restic_password:ro
+      - "${RESTIC_REPOSITORY_PATH:?Set RESTIC_REPOSITORY_PATH in .env}:/repository"
+      - "${RESTIC_PASSWORD_FILE:?Set RESTIC_PASSWORD_FILE in .env}:/run/secrets/restic_password:ro"
     entrypoint: ["restic"]
+
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  prometheus-data:
+  grafana-data:
