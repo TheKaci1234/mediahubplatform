@@ -1,0 +1,66 @@
+
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: mediahub-availability
+    folder: MediaHub
+    interval: 1m
+    rules:
+      - uid: mediahub-navidrome-down
+        title: NavidromeUnavailable
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: up{job="navidrome"} == 0
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+              range: false
+        noDataState: Alerting
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: Navidrome is unavailable
+          description: Prometheus cannot successfully scrape the Navidrome target. Check the container and metrics endpoint.
+        labels:
+          severity: critical
+
+      - uid: mediahub-navidrome-metrics-missing
+        title: NavidromeMetricsMissing
+        condition: A
+        data:
+          - refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: prometheus
+            model:
+              datasource:
+                type: prometheus
+                uid: prometheus
+              editorMode: code
+              expr: absent(up{job="navidrome"})
+              instant: true
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: A
+              range: false
+        noDataState: OK
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: Navidrome target metrics are missing
+          description: Prometheus has no up metric for the Navidrome target. Check the scrape configuration and target discovery.
+        labels:
+          severity: warning
