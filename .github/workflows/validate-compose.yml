@@ -5,19 +5,23 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  validate-compose:
-    name: Validate Docker Compose
+  validate:
+    name: Validate configuration
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check Docker Compose
-        run: docker compose version
-
-      - name: Validate Compose configuration
+      - name: Check Docker Compose configuration
         env:
           MUSIC_DIR: /tmp/mediahub-music
-        run: docker compose config -q
+          RESTIC_REPOSITORY_PATH: /tmp/mediahub-restic
+          RESTIC_PASSWORD_FILE: /tmp/mediahub-restic-password
+        run: |
+          docker compose version
+          docker compose config -q
