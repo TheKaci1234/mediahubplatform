@@ -1,72 +1,117 @@
-# mediahubplatform
+# MediaHub
+
 A personal DevOps and automation project focused on building and maintaining a self-hosted environment for services related to my hobbies, including anime, manga, music, books and gaming.
 
 The main goal is to explore and apply DevOps practices by automating infrastructure configuration, application deployment and ongoing maintenance.
 
 ## Objectives
 
-* Automate repetitive tasks and workflows.
-* Manage services using containerization.
-* Implement CI/CD pipelines for validation, testing and deployment.
-* Use version control and configuration as code.
-* Improve service monitoring and reliability.
-* Implement automated backups and recovery procedures.
-* Apply security best practices.
-* Document the setup and configuration to ensure reproducibility.
+- Automate repetitive tasks and workflows.
+- Manage services using containerization.
+- Implement CI/CD pipelines for validation and testing.
+- Use version control and configuration as code.
+- Improve service monitoring and reliability.
+- Implement backups and recovery procedures.
+- Apply security best practices.
+- Document the setup and configuration to ensure reproducibility.
 
 ## Technologies
 
-The project will explore tools and technologies related to:
+The project currently uses or explores technologies related to:
 
-* Linux and systems administration
-* Docker and containerization
-* Infrastructure and configuration automation
-* CI/CD and version control
-* Scripting and automated testing
-* Monitoring and observability
-* Security and backup management
+- Linux and systems administration
+- Docker Compose and containerization
+- Git and GitHub
+- GitHub Actions for CI validation
+- Prometheus and Grafana for monitoring and alerting
+- Restic for encrypted backups
+- Shell scripting and configuration as code
 
-Specific technologies may evolve as the project develops.
+Additional technologies may be introduced as the project develops.
 
 ## Project Structure
 
-The repository will contain service configurations, automation scripts, CI/CD configuration, tests and documentation. Its structure will evolve alongside the project.
-Personal setup running using WSL, the default .env and settings will reflect that.
+The repository contains service configurations, automation scripts, CI/CD configuration and documentation. Its structure evolves alongside the project.
 
-## Goals
+The current personal setup runs on WSL with Ubuntu. Environment-specific settings are configured through a `.env` file, with `.env.example` documenting the required variables without exposing secrets.
 
-The project aims to provide a practical environment for developing skills in systems engineering, DevOps and automation while building something useful for personal use.
+## Architecture and Design Decisions
 
-The emphasis is on reproducibility, maintainability, reliability and reducing manual intervention through automation.
+MediaHub uses Docker Compose to manage its services in a shared container network. This keeps deployment configuration in one place and makes it straightforward to start, stop and maintain the environment.
 
-## Platforms
+### Service deployment
+
+Navidrome provides music streaming from a local music library. The library is mounted into the container as read-only, while Navidrome's application data is stored separately to preserve its configuration and state.
+
+Persistent data is kept outside the Git repository. Configuration files are version-controlled so that the setup can be reproduced without committing application data or secrets.
+
+### Monitoring and alerting
+
+Prometheus collects metrics from Navidrome and monitors its availability. Grafana uses Prometheus as its data source to display service metrics through a provisioned dashboard.
+
+Grafana alert rules detect when Navidrome becomes unavailable or its expected metrics are missing. Dashboard, data source and alert configurations are stored in the repository so they can be provisioned automatically when Grafana starts.
+
+### Backup and recovery
+
+Restic runs in a dedicated Docker Compose service to back up Navidrome's application data, excluding the music library.
+
+- **Storage:** A local Restic repository inside the WSL filesystem.
+- **Security:** Encrypted backups, with the repository password stored outside Git.
+- **Retention:** Keeps seven daily snapshots, removing older snapshots according to the configured retention policy.
+- **Verification:** The backup script checks repository integrity after creating a backup and applying retention.
+- **Execution:** Backups are currently run manually through `scripts/backup.sh`. Scheduling is left for future development.
+
+The backup process is kept separate from the main service deployment so backup operations can be run when needed without adding another always-running container.
+
+### CI/CD and configuration management
+
+GitHub Actions validates the Docker Compose configuration on pushes and pull requests. This catches configuration errors before changes are merged.
+
+Environment-specific values are supplied through environment variables, while secrets and local paths remain outside version control. The current pipeline validates configuration rather than deploying changes automatically.
+
+## Platforms and Services
 
 ### Navidrome
 
-For hosting local music library. Deployment via docker compose. Runs on port 4533 by default(subject to change).
+Navidrome hosts the local music library and provides access to music through a web interface and compatible clients.
 
-### Backup and Recovery
+- **Deployment:** Docker Compose
+- **Default port:** `4533`
+- **Monitoring:** Prometheus metrics
+- **Backup:** Restic for application data
 
-Mediahub uses [Restic](https://restic.net/) in Docker to create encrypted backups of Navidrome's(only for now) application data, excluding the music library.
+### Prometheus
 
-- **Storage:** Local Restic repository inside the WSL filesystem.
-- **Security:** Encrypted backups with a password stored outside Git.
-- **Retention:** Keeps the seven most recent daily snapshots.
-- **Verification:** Checks repository integrity and supports restore testing.
-- **Automation:** Backups currently run manually via `scripts/backup.sh`; scheduling will be added later.
+Prometheus collects and stores service metrics. It is configured to scrape its own metrics and those exposed by Navidrome.
+
+### Grafana
+
+Grafana provides dashboards and alerting based on Prometheus metrics. Its dashboard, data source and alert rules are provisioned from repository configuration.
+
+### Restic
+
+Restic provides encrypted backups of Navidrome's application data. The backup workflow is managed through `scripts/backup.sh`.
 
 Run a backup:
 
 ```bash
 ./scripts/backup.sh
 ```
+
 List snapshots:
 
 ```bash
 docker compose --profile backup run --rm restic snapshots
 ```
 
-## Status
+## Current Status
 
-Currently in development, experimental and very much unfinished.
+MediaHub is an ongoing personal project. The current setup includes music streaming, monitoring, dashboards, availability alerting, encrypted backups and CI configuration validation.
 
+Further development will focus on improving the existing setup where useful, documenting operational procedures and exploring additional automation without introducing unnecessary complexity.
+
+## Goals
+
+The project aims to provide a practical environment for developing skills in systems engineering, DevOps and automation while building something useful for personal use.
+
+The emphasis is on reproducibility, maintainability, reliability, security and reducing manual intervention through automation.
