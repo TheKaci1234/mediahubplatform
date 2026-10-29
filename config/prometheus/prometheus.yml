@@ -10,3 +10,8 @@ scrape_configs:
     metrics_path: /metrics_mediahub
     static_configs:
       - targets: ["navidrome:4533"]
+
+  - job_name: jellyfin
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["jellyfin:8096"]

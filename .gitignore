@@ -3,3 +3,7 @@
 /services/navidrome/data/*.db
 /services/navidrome/data/*.db-shm
 /services/navidrome/data/*.db-wal
+.jellyfin-data
+/services/jellyfin/cache/*
+/services/jellyfin/config/data/*
+/services/jellyfin/config/*

@@ -41,13 +41,19 @@ MediaHub uses Docker Compose to manage its services in a shared container networ
 
 ### Service deployment
 
-Navidrome provides music streaming from a local music library. The library is mounted into the container as read-only, while Navidrome's application data is stored separately to preserve its configuration and state.
+**Navidrome** provides music streaming from a local music library. The library is mounted into the container as read-only, while Navidrome's application data is stored separately to preserve its configuration and state.
 
-Persistent data is kept outside the Git repository. Configuration files are version-controlled so that the setup can be reproduced without committing application data or secrets.
+**Jellyfin** provides media streaming from a local video library through a web interface and compatible clients. The media directory is mounted into the container as read-only, while its configuration and cache are stored separately to preserve application settings and runtime data.
+
+Persistent application data is kept outside the Git repository. Configuration files are version-controlled so that the setup can be reproduced without committing application data or secrets.
 
 ### Monitoring and alerting
 
-Prometheus collects metrics from Navidrome and monitors its availability. Grafana uses Prometheus as its data source to display service metrics through a provisioned dashboard.
+Prometheus collects metrics from Navidrome and Jellyfin and monitors their availability. It also collects its own metrics.
+
+Navidrome exposes metrics through its configured `/metrics_mediahub` endpoint, while Jellyfin exposes metrics through its `/metrics` endpoint.
+
+Grafana uses Prometheus as its data source to display service metrics through provisioned dashboards. Separate dashboards are used for Navidrome and Jellyfin.
 
 Grafana alert rules detect when Navidrome becomes unavailable or its expected metrics are missing. Dashboard, data source and alert configurations are stored in the repository so they can be provisioned automatically when Grafana starts.
 
@@ -62,6 +68,8 @@ Restic runs in a dedicated Docker Compose service to back up Navidrome's applica
 - **Execution:** Backups are currently run manually through `scripts/backup.sh`. Scheduling is left for future development.
 
 The backup process is kept separate from the main service deployment so backup operations can be run when needed without adding another always-running container.
+
+Jellyfin's configuration and cache are stored separately, but automated backups for Jellyfin have not yet been configured.
 
 ### CI/CD and configuration management
 
@@ -80,9 +88,20 @@ Navidrome hosts the local music library and provides access to music through a w
 - **Monitoring:** Prometheus metrics
 - **Backup:** Restic for application data
 
+### Jellyfin
+
+Jellyfin hosts the local video library and provides media streaming through a web interface and compatible clients.
+
+- **Deployment:** Docker Compose
+- **Default port:** `8096`
+- **Media storage:** Local video library mounted read-only
+- **Persistent data:** Configuration and cache stored separately
+- **Monitoring:** Prometheus metrics exposed through `/metrics`
+- **Backup:** Automated backups not yet configured
+
 ### Prometheus
 
-Prometheus collects and stores service metrics. It is configured to scrape its own metrics and those exposed by Navidrome.
+Prometheus collects and stores service metrics. It is configured to scrape its own metrics and those exposed by Navidrome and Jellyfin.
 
 ### Grafana
 
@@ -106,7 +125,7 @@ docker compose --profile backup run --rm restic snapshots
 
 ## Current Status
 
-MediaHub is an ongoing personal project. The current setup includes music streaming, monitoring, dashboards, availability alerting, encrypted backups and CI configuration validation.
+MediaHub is an ongoing personal project. The current setup includes music and video streaming through Navidrome and Jellyfin, Prometheus monitoring, Grafana dashboards, availability alerting, encrypted backups for Navidrome and CI configuration validation.
 
 Further development will focus on improving the existing setup where useful, documenting operational procedures and exploring additional automation without introducing unnecessary complexity.
 

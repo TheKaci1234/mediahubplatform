@@ -22,6 +22,20 @@ services:
       - "./services/navidrome/data:/data"
       - "${MUSIC_DIR:?Set MUSIC_DIR in .env}:/music:ro"
 
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: mediahub-jellyfin
+    user: "1000:1000"
+    ports:
+      - "8096:8096"
+    restart: unless-stopped
+    environment:
+      TZ: Europe/Brussels
+    volumes:
+      - ./services/jellyfin/config:/config
+      - ./services/jellyfin/cache:/cache
+      - "${VIDEO_DIR:?Set VIDEO_DIR in .env}:/media:ro"
+
   restic:
     image: restic/restic:latest
     container_name: mediahub-restic
